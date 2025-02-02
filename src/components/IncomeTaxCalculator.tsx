@@ -135,7 +135,7 @@ const IncomeTaxCalculator = () => {
     const savings = totalTax2425 - totalTax2526;
 
     return (
-        <div className="w-full max-w-3xl mx-auto p-0 md:p-4">
+        <div className="w-full max-w-3xl mx-auto p-0 md:p-4 text-pretty">
             <Card className="w-full">
                 <CardHeader>
                     <CardTitle>Indian Income Tax Calculator (FY 2024-25 vs 2025-26)</CardTitle>
@@ -155,9 +155,17 @@ const IncomeTaxCalculator = () => {
                                 id="income"
                                 type="number"
                                 value={income}
-                                onChange={(e) => setIncome(e.target.value)}
+                                onChange={(e) => {
+                                    const value = Number(e.target.value);
+                                    if (value >= 0 || e.target.value === "") {
+                                        setIncome(e.target.value);
+                                    }
+                                }}
                                 placeholder="Enter your annual income"
                                 className="mt-1"
+                                pattern="^[0-9]*$"
+                                min="0"
+                                autoFocus
                             />
                         </div>
 
@@ -175,7 +183,7 @@ const IncomeTaxCalculator = () => {
                         {/* Tax Savings Section */}
                         <div className="mt-6 p-4 bg-green-50 rounded-lg">
                             <h3 className="font-semibold text-lg mb-2">Your Tax Savings in FY 2025-26</h3>
-                            <p className="text-2xl text-green-600">
+                            <p className="text-2xl text-green-600 truncate">
                                 {formatCurrency(savings)}
                             </p>
                         </div>
@@ -194,18 +202,18 @@ const IncomeTaxCalculator = () => {
                                     </button>
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="flex justify-between">
-                                        <span>Gross Income:</span>
+                                    <div className="flex justify-between truncate">
+                                        <span className='mr-2'>Gross Income:</span>
                                         <span>{formatCurrency(Number(income) || 0)}</span>
                                     </div>
                                     {isSalaried && (
-                                        <div className="flex justify-between">
-                                            <span>Standard Deduction:</span>
+                                        <div className="flex justify-between truncate">
+                                            <span className='mr-2'>Standard Deduction:</span>
                                             <span>{formatCurrency(STANDARD_DEDUCTION)}</span>
                                         </div>
                                     )}
-                                    <div className="flex justify-between">
-                                        <span>Taxable Income:</span>
+                                    <div className="flex justify-between truncate">
+                                        <span className='mr-2'>Taxable Income:</span>
                                         <span>{formatCurrency(tax2526.taxableIncome)}</span>
                                     </div>
                                     {tax2526.isRebateApplicable ? (
@@ -214,19 +222,19 @@ const IncomeTaxCalculator = () => {
                                         </div>
                                     ) : (
                                         <>
-                                            <div className="flex justify-between">
-                                                <span>Base Tax:</span>
+                                            <div className="flex justify-between truncate">
+                                                <span className='mr-2'>Base Tax:</span>
                                                 <span>{formatCurrency(tax2526.tax)}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span>Health & Education Cess:</span>
+                                            <div className="flex justify-between truncate">
+                                                <span className='mr-2'>Health & Education Cess:</span>
                                                 <span>{formatCurrency(tax2526.cess)}</span>
                                             </div>
                                         </>
                                     )}
                                     <div className="flex justify-between pt-2 border-t">
-                                        <span>Total Tax:</span>
-                                        <span className="text-2xl text-blue-600">{formatCurrency(totalTax2526)}</span>
+                                        <span className='mr-2 text-nowrap'>Total Tax:</span>
+                                        <span className="text-2xl text-blue-600 truncate">{formatCurrency(totalTax2526)}</span>
                                     </div>
                                     <div className="text-sm text-blue-600 text-right">
                                         Effective Rate: {income ? ((totalTax2526 / parseFloat(income)) * 100).toFixed(1) : 0}%
@@ -258,18 +266,18 @@ const IncomeTaxCalculator = () => {
                                     </button>
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="flex justify-between">
-                                        <span>Gross Income:</span>
+                                    <div className="flex justify-between truncate">
+                                        <span className='mr-2'>Gross Income:</span>
                                         <span>{formatCurrency(Number(income) || 0)}</span>
                                     </div>
                                     {isSalaried && (
-                                        <div className="flex justify-between">
-                                            <span>Standard Deduction:</span>
+                                        <div className="flex justify-between truncate">
+                                            <span className='mr-2'>Standard Deduction:</span>
                                             <span>{formatCurrency(STANDARD_DEDUCTION)}</span>
                                         </div>
                                     )}
-                                    <div className="flex justify-between">
-                                        <span>Taxable Income:</span>
+                                    <div className="flex justify-between truncate">
+                                        <span className='mr-2'>Taxable Income:</span>
                                         <span>{formatCurrency(tax2425.taxableIncome)}</span>
                                     </div>
                                     {tax2425.isRebateApplicable ? (
@@ -278,19 +286,19 @@ const IncomeTaxCalculator = () => {
                                         </>
                                     ) : (
                                         <>
-                                            <div className="flex justify-between">
-                                                <span>Base Tax:</span>
+                                            <div className="flex justify-between truncate">
+                                                <span className='mr-2'>Base Tax:</span>
                                                 <span>{formatCurrency(tax2425.tax)}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span>Health & Education Cess:</span>
+                                            <div className="flex justify-between truncate">
+                                                <span className='mr-2'>Health & Education Cess:</span>
                                                 <span>{formatCurrency(tax2425.cess)}</span>
                                             </div>
                                         </>
                                     )}
                                     <div className="flex justify-between pt-2 border-t">
-                                        <span>Total Tax:</span>
-                                        <span className="text-2xl text-gray-600">{formatCurrency(totalTax2425)}</span>
+                                        <span className='mr-2 text-nowrap'>Total Tax:</span>
+                                        <span className="text-2xl text-gray-600 truncate">{formatCurrency(totalTax2425)}</span>
                                     </div>
                                     <div className="text-sm text-gray-600 text-right">
                                         Effective Rate: {income ? ((totalTax2425 / parseFloat(income)) * 100).toFixed(1) : 0}%
