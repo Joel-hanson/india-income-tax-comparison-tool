@@ -1,9 +1,10 @@
 "use client"
 
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, InfoIcon } from 'lucide-react';
 import { useState } from 'react';
 
 const IncomeTaxCalculator = () => {
@@ -12,6 +13,8 @@ const IncomeTaxCalculator = () => {
     const [showSlabs, setShowSlabs] = useState<boolean>(false);
 
     const STANDARD_DEDUCTION = 75000; // ₹75,000 standard deduction for both years
+    const REBATE_LIMIT_2425 = 700000;  // 7 lakh rebate for FY 2024-25
+    const REBATE_LIMIT_2526 = 1200000; // 12 lakh rebate for FY 2025-26
 
     const calculateTaxableIncome = (grossIncome: number, isSalariedPerson: boolean): number => {
         if (!isSalariedPerson) return grossIncome;
@@ -22,13 +25,20 @@ const IncomeTaxCalculator = () => {
         tax: number;
         cess: number;
         taxableIncome: number;
+        isRebateApplicable: boolean
     }
 
     const calculateTax2425 = (grossIncome: string): TaxResult => {
         const income = parseFloat(grossIncome);
-        if (isNaN(income)) return { tax: 0, cess: 0, taxableIncome: 0 };
+        if (isNaN(income)) return { tax: 0, cess: 0, taxableIncome: 0, isRebateApplicable: false };
 
         const taxableIncome = calculateTaxableIncome(income, isSalaried);
+
+        const isRebateApplicable = taxableIncome <= REBATE_LIMIT_2425;
+        if (isRebateApplicable) {
+            return { tax: 0, cess: 0, taxableIncome, isRebateApplicable };
+        }
+
         let remainingIncome = taxableIncome;
         let tax = 0;
 
@@ -58,14 +68,21 @@ const IncomeTaxCalculator = () => {
 
         const cess = tax * 0.04;
 
-        return { tax, cess, taxableIncome };
+        return { tax, cess, taxableIncome, isRebateApplicable };
     };
 
     const calculateTax2526 = (grossIncome: string): TaxResult => {
         const income = parseFloat(grossIncome);
-        if (isNaN(income)) return { tax: 0, cess: 0, taxableIncome: 0 };
+        if (isNaN(income)) return { tax: 0, cess: 0, taxableIncome: 0, isRebateApplicable: false };
 
         const taxableIncome = calculateTaxableIncome(income, isSalaried);
+
+        // Check if eligible for rebate
+        const isRebateApplicable = taxableIncome <= REBATE_LIMIT_2526;
+        if (isRebateApplicable) {
+            return { tax: 0, cess: 0, taxableIncome, isRebateApplicable };
+        }
+
         let remainingIncome = taxableIncome;
         let tax = 0;
 
@@ -100,7 +117,7 @@ const IncomeTaxCalculator = () => {
 
         const cess = tax * 0.04; // 4% Health and Education Cess
 
-        return { tax, cess, taxableIncome };
+        return { tax, cess, taxableIncome, isRebateApplicable };
     };
 
     const formatCurrency = (amount: number): string => {
@@ -124,6 +141,13 @@ const IncomeTaxCalculator = () => {
                     <CardTitle>Indian Income Tax Calculator (FY 2024-25 vs 2025-26)</CardTitle>
                 </CardHeader>
                 <CardContent>
+                    <Alert className="mb-4">
+                        <InfoIcon className="h-4 w-4" />
+                        <AlertDescription>
+                            New tax rebate: No tax up to ₹7 lakh in FY 2024-25 and up to ₹12 lakh in FY 2025-26 under the new tax regime.
+                        </AlertDescription>
+                    </Alert>
+
                     <div className="space-y-4">
                         <div>
                             <Label htmlFor="income">Annual Income (₹)</Label>
@@ -184,14 +208,22 @@ const IncomeTaxCalculator = () => {
                                         <span>Taxable Income:</span>
                                         <span>{formatCurrency(tax2526.taxableIncome)}</span>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span>Base Tax:</span>
-                                        <span>{formatCurrency(tax2526.tax)}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Health & Education Cess:</span>
-                                        <span>{formatCurrency(tax2526.cess)}</span>
-                                    </div>
+                                    {tax2526.isRebateApplicable ? (
+                                        <div className="flex justify-between">
+                                            <p className="text-green-600 font-semibold">Eligible for zero tax rebate (≤ ₹12 lakh)</p>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="flex justify-between">
+                                                <span>Base Tax:</span>
+                                                <span>{formatCurrency(tax2526.tax)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>Health & Education Cess:</span>
+                                                <span>{formatCurrency(tax2526.cess)}</span>
+                                            </div>
+                                        </>
+                                    )}
                                     <div className="flex justify-between pt-2 border-t">
                                         <span>Total Tax:</span>
                                         <span className="text-2xl text-blue-600">{formatCurrency(totalTax2526)}</span>
@@ -240,14 +272,22 @@ const IncomeTaxCalculator = () => {
                                         <span>Taxable Income:</span>
                                         <span>{formatCurrency(tax2425.taxableIncome)}</span>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span>Base Tax:</span>
-                                        <span>{formatCurrency(tax2425.tax)}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Health & Education Cess:</span>
-                                        <span>{formatCurrency(tax2425.cess)}</span>
-                                    </div>
+                                    {tax2425.isRebateApplicable ? (
+                                        <>
+                                            <p className="text-green-600 font-semibold">Eligible for zero tax rebate (≤ ₹7 lakh)</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="flex justify-between">
+                                                <span>Base Tax:</span>
+                                                <span>{formatCurrency(tax2425.tax)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>Health & Education Cess:</span>
+                                                <span>{formatCurrency(tax2425.cess)}</span>
+                                            </div>
+                                        </>
+                                    )}
                                     <div className="flex justify-between pt-2 border-t">
                                         <span>Total Tax:</span>
                                         <span className="text-2xl text-gray-600">{formatCurrency(totalTax2425)}</span>
